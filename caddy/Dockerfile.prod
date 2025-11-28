@@ -1,0 +1,21 @@
+FROM node:20 AS builder
+
+WORKDIR /app
+
+COPY client/package*.json ./
+
+RUN npm ci
+
+COPY ./client ./
+
+ARG BASE_URL
+
+RUN echo "VITE_BASE_URL=$BASE_URL" > .env
+
+RUN npm run build
+
+FROM caddy:latest
+
+COPY --from=builder /app/dist /var/www/dist
+
+COPY ./caddy/Caddyfile.prod /etc/caddy/Caddyfile

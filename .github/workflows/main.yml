@@ -1,0 +1,103 @@
+name: main
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile.prod
+          push: true
+          tags: |
+            ghcr.io/danieii/menuinstant-server:latest
+            ghcr.io/danieii/menuinstant-server:${{ github.sha }}
+
+  build-caddy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push caddy image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./caddy/Dockerfile.prod
+          push: true
+          build-args: |
+            BASE_URL=${{ secrets.BASE_URL }}
+          tags: |
+            ghcr.io/danieii/menuinstant-caddy:latest
+            ghcr.io/danieii/menuinstant-caddy:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-server, build-caddy]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: create env file
+        run: |
+          cat << 'EOF' > .env
+          GIT_COMMIT_HASH=${{ github.sha }}
+          BASE_URL="${{ secrets.BASE_URL }}"
+          SECRET_KEY="${{ secrets.SECRET_KEY }}"
+          DATABASE_URL="${{ secrets.DATABASE_URL }}"
+          ALLOWED_HOSTS="${{ secrets.ALLOWED_HOSTS }}"
+          CSRF_TRUSTED_ORIGINS="${{ secrets.CSRF_TRUSTED_ORIGINS }}"
+          GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
+          GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}"
+          FACEBOOK_CLIENT_ID="${{ secrets.FACEBOOK_CLIENT_ID }}"
+          FACEBOOK_CLIENT_SECRET="${{ secrets.FACEBOOK_CLIENT_SECRET }}"
+          STRIPE_PUBLISHABLE_KEY="${{ secrets.STRIPE_PUBLISHABLE_KEY }}"
+          STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}"
+          STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}"
+          AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          AWS_STORAGE_BUCKET_NAME="${{ secrets.AWS_STORAGE_BUCKET_NAME }}"
+          AWS_S3_REGION_NAME="${{ secrets.AWS_S3_REGION_NAME }}"
+          RESEND_API_KEY="${{ secrets.RESEND_API_KEY }}"
+          DEFAULT_FROM_EMAIL="${{ secrets.DEFAULT_FROM_EMAIL }}"
+          EOF
+
+      - name: Docker Stack Deploy
+        uses: cssnr/stack-deploy-action@v1
+        with:
+          name: menuinstant
+          file: docker-stack.yaml
+          host: menuinstant.com
+          user: deploy
+          ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          env_file: .env
+          registry_host: 'ghcr.io'
+          registry_user: ${{ vars.GHCR_USER }}
+          registry_pass: ${{ secrets.GHCR_PASS }}
+          registry_auth: true

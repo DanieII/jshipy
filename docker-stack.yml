@@ -1,0 +1,72 @@
+services:
+  db:
+    image: postgres:latest
+    secrets:
+      - db-password
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/db-password
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    image: ghcr.io/danieii/jshipy-server:${GIT_COMMIT_HASH:-latest}
+    ports:
+      - 8000:8000
+    volumes:
+      - staticfiles:/app/staticfiles
+    environment:
+      - DEBUG=False
+      - BASE_URL=${BASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FACEBOOK_CLIENT_ID=${FACEBOOK_CLIENT_ID}
+      - FACEBOOK_CLIENT_SECRET=${FACEBOOK_CLIENT_SECRET}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+    deploy:
+      update_config:
+        order: start-first
+    depends_on:
+      - db
+    
+  caddy:
+    image: ghcr.io/danieii/jshipy-caddy:${GIT_COMMIT_HASH:-latest}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - staticfiles:/var/www/staticfiles
+      - /root/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+  staticfiles:
+  dist:
+  caddy_data:
+  caddy_config:
+
+secrets:
+  db-password:
+    external: true

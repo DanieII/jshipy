@@ -1,0 +1,28 @@
+www.jshipy.com {
+    redir https://menuinstant.com{uri} permanent
+}
+
+jshipy.com {
+    handle_path /static/* {
+        root * /var/www/staticfiles
+        file_server
+    }
+
+    handle /api* {
+        reverse_proxy server:8000
+    }
+
+    handle /admin* {
+        reverse_proxy server:8000
+    }
+
+    handle /sitemap.xml {
+        reverse_proxy server:8000
+    }
+
+    handle {
+        root * /var/www/dist
+        try_files {path} /index.html
+        file_server
+    }
+}
