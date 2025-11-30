@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "storages",
     "django_cleanup.apps.CleanupConfig",
     # Local
+    "accounts",
+    "subscriptions",
 ]
 
 MIDDLEWARE = [
