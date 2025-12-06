@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.headless",
-    "allauth.socialaccount",
     "allauth.usersessions",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
@@ -57,6 +56,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -170,7 +170,7 @@ HEADLESS_FRONTEND_URLS = {
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
+ACCOUNT_SIGNUP_FIELDS = ["email", "password1", "password2"]
 
 SOCIALACCOUNT_STORE_TOKENS = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True

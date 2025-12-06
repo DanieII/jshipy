@@ -14,11 +14,7 @@ services:
       - 8000:8000
     volumes:
       - staticfiles:/app/staticfiles
-    develop:
-      watch:
-        - action: sync
-          path: ./server
-          target: /app
+      - ./server/:/app
     env_file:
       .env
     depends_on:

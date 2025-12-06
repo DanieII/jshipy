@@ -9,38 +9,75 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AccountsRouteImport } from './routes/_accounts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountsRegisterRouteImport } from './routes/_accounts/register'
+import { Route as AccountsLoginRouteImport } from './routes/_accounts/login'
 
+const AccountsRoute = AccountsRouteImport.update({
+  id: '/_accounts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountsRegisterRoute = AccountsRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AccountsRoute,
+} as any)
+const AccountsLoginRoute = AccountsLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AccountsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof AccountsLoginRoute
+  '/register': typeof AccountsRegisterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof AccountsLoginRoute
+  '/register': typeof AccountsRegisterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_accounts': typeof AccountsRouteWithChildren
+  '/_accounts/login': typeof AccountsLoginRoute
+  '/_accounts/register': typeof AccountsRegisterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/login' | '/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/login' | '/register'
+  id:
+    | '__root__'
+    | '/'
+    | '/_accounts'
+    | '/_accounts/login'
+    | '/_accounts/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountsRoute: typeof AccountsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_accounts': {
+      id: '/_accounts'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AccountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +85,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_accounts/register': {
+      id: '/_accounts/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof AccountsRegisterRouteImport
+      parentRoute: typeof AccountsRoute
+    }
+    '/_accounts/login': {
+      id: '/_accounts/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AccountsLoginRouteImport
+      parentRoute: typeof AccountsRoute
+    }
   }
 }
 
+interface AccountsRouteChildren {
+  AccountsLoginRoute: typeof AccountsLoginRoute
+  AccountsRegisterRoute: typeof AccountsRegisterRoute
+}
+
+const AccountsRouteChildren: AccountsRouteChildren = {
+  AccountsLoginRoute: AccountsLoginRoute,
+  AccountsRegisterRoute: AccountsRegisterRoute,
+}
+
+const AccountsRouteWithChildren = AccountsRoute._addFileChildren(
+  AccountsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountsRoute: AccountsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
