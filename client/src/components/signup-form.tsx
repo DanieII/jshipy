@@ -10,6 +10,7 @@ import { Field, FieldDescription, FieldGroup } from '@/components/ui/field'
 import { useAuth } from '@/context/auth-context'
 import { useAppForm } from '@/context/form-context'
 import { getAuthErrors } from '@/lib/utils'
+import { useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 
 const formSchema = z
@@ -25,6 +26,7 @@ const formSchema = z
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const auth = useAuth()
+  const navigate = useNavigate()
   const form = useAppForm({
     defaultValues: {
       email: '',
@@ -34,9 +36,13 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     validators: {
       onSubmit: formSchema,
       onSubmitAsync: async ({ value: data }) => {
-        const result = await auth.signup(data.email, data.password)
+        const result = await auth.login(data.email, data.password)
 
-        return getAuthErrors(result.errors)
+        if (result.errors) {
+          return getAuthErrors(result.errors)
+        }
+
+        navigate({ to: '/' })
       },
     },
   })
