@@ -7,17 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Field, FieldDescription, FieldGroup } from '@/components/ui/field'
 import { z } from 'zod'
 import { useAuth } from '@/context/auth-context'
 import { useAppForm } from '@/context/form-context'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, Link } from '@tanstack/react-router'
 
 const formSchema = z.object({
   email: z.email(),
@@ -75,12 +69,12 @@ export function LoginForm({
                     <field.TextField label="Password" type="password" />
                   )}
                 </form.AppField>
-                <a
-                  href="#"
+                <Link
+                  to="/password/reset"
                   className="block text-center text-sm underline-offset-4 hover:underline"
                 >
                   Forgot your password?
-                </a>
+                </Link>
               </div>
               <Field>
                 <Button type="submit">Login</Button>

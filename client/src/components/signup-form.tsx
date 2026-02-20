@@ -36,7 +36,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     validators: {
       onSubmit: formSchema,
       onSubmitAsync: async ({ value: data }) => {
-        const result = await auth.login(data.email, data.password)
+        const result = await auth.signup(data.email, data.password)
 
         if (result.errors) {
           return getAuthErrors(result.errors)

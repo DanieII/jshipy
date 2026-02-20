@@ -13,6 +13,8 @@ import { Route as AccountsRouteImport } from './routes/_accounts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountsRegisterRouteImport } from './routes/_accounts/register'
 import { Route as AccountsLoginRouteImport } from './routes/_accounts/login'
+import { Route as AccountsPasswordResetIndexRouteImport } from './routes/_accounts/password/reset/index'
+import { Route as AccountsPasswordResetKeyKeyIndexRouteImport } from './routes/_accounts/password/reset/key/$key/index'
 
 const AccountsRoute = AccountsRouteImport.update({
   id: '/_accounts',
@@ -33,16 +35,32 @@ const AccountsLoginRoute = AccountsLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AccountsRoute,
 } as any)
+const AccountsPasswordResetIndexRoute =
+  AccountsPasswordResetIndexRouteImport.update({
+    id: '/password/reset/',
+    path: '/password/reset/',
+    getParentRoute: () => AccountsRoute,
+  } as any)
+const AccountsPasswordResetKeyKeyIndexRoute =
+  AccountsPasswordResetKeyKeyIndexRouteImport.update({
+    id: '/password/reset/key/$key/',
+    path: '/password/reset/key/$key/',
+    getParentRoute: () => AccountsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof AccountsLoginRoute
   '/register': typeof AccountsRegisterRoute
+  '/password/reset': typeof AccountsPasswordResetIndexRoute
+  '/password/reset/key/$key': typeof AccountsPasswordResetKeyKeyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AccountsLoginRoute
   '/register': typeof AccountsRegisterRoute
+  '/password/reset': typeof AccountsPasswordResetIndexRoute
+  '/password/reset/key/$key': typeof AccountsPasswordResetKeyKeyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,18 +68,32 @@ export interface FileRoutesById {
   '/_accounts': typeof AccountsRouteWithChildren
   '/_accounts/login': typeof AccountsLoginRoute
   '/_accounts/register': typeof AccountsRegisterRoute
+  '/_accounts/password/reset/': typeof AccountsPasswordResetIndexRoute
+  '/_accounts/password/reset/key/$key/': typeof AccountsPasswordResetKeyKeyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/password/reset'
+    | '/password/reset/key/$key'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/password/reset'
+    | '/password/reset/key/$key'
   id:
     | '__root__'
     | '/'
     | '/_accounts'
     | '/_accounts/login'
     | '/_accounts/register'
+    | '/_accounts/password/reset/'
+    | '/_accounts/password/reset/key/$key/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -99,17 +131,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountsLoginRouteImport
       parentRoute: typeof AccountsRoute
     }
+    '/_accounts/password/reset/': {
+      id: '/_accounts/password/reset/'
+      path: '/password/reset'
+      fullPath: '/password/reset'
+      preLoaderRoute: typeof AccountsPasswordResetIndexRouteImport
+      parentRoute: typeof AccountsRoute
+    }
+    '/_accounts/password/reset/key/$key/': {
+      id: '/_accounts/password/reset/key/$key/'
+      path: '/password/reset/key/$key'
+      fullPath: '/password/reset/key/$key'
+      preLoaderRoute: typeof AccountsPasswordResetKeyKeyIndexRouteImport
+      parentRoute: typeof AccountsRoute
+    }
   }
 }
 
 interface AccountsRouteChildren {
   AccountsLoginRoute: typeof AccountsLoginRoute
   AccountsRegisterRoute: typeof AccountsRegisterRoute
+  AccountsPasswordResetIndexRoute: typeof AccountsPasswordResetIndexRoute
+  AccountsPasswordResetKeyKeyIndexRoute: typeof AccountsPasswordResetKeyKeyIndexRoute
 }
 
 const AccountsRouteChildren: AccountsRouteChildren = {
   AccountsLoginRoute: AccountsLoginRoute,
   AccountsRegisterRoute: AccountsRegisterRoute,
+  AccountsPasswordResetIndexRoute: AccountsPasswordResetIndexRoute,
+  AccountsPasswordResetKeyKeyIndexRoute: AccountsPasswordResetKeyKeyIndexRoute,
 }
 
 const AccountsRouteWithChildren = AccountsRoute._addFileChildren(
