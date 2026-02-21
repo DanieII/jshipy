@@ -9,8 +9,8 @@ import {
 import { Field, FieldDescription, FieldGroup } from '@/components/ui/field'
 import { useAuth } from '@/context/auth-context'
 import { useAppForm } from '@/context/form-context'
-import { getAuthErrors } from '@/lib/utils'
-import { useNavigate } from '@tanstack/react-router'
+import { getAuthFormErrors } from '@/lib/utils'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 
 const formSchema = z
@@ -37,10 +37,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       onSubmit: formSchema,
       onSubmitAsync: async ({ value: data }) => {
         const result = await auth.signup(data.email, data.password)
+        const errors = getAuthFormErrors(result.errors)
 
-        if (result.errors) {
-          return getAuthErrors(result.errors)
-        }
+        if (errors) return errors
 
         navigate({ to: '/' })
       },
@@ -94,11 +93,15 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             <FieldGroup>
               <Field>
                 <Button type="submit">Create Account</Button>
-                <Button variant="outline" type="button">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => auth.redirectToProvider('google', 'login')}
+                >
                   Sign up with Google
                 </Button>
                 <FieldDescription className="px-6 text-center">
-                  Already have an account? <a href="#">Sign in</a>
+                  Already have an account? <Link to="/login">Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

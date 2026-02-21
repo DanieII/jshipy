@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
-import { apiFetch } from '@/lib/utils'
+import { apiFetch, getCookie, postForm } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 
 export type AuthContext = {
@@ -16,6 +16,7 @@ export type AuthContext = {
     password: string,
   ) => Promise<{ user?: any; errors?: any }>
   logout: () => Promise<void>
+  redirectToProvider: (provider: string, process: string) => void
 }
 
 export const AuthContext = createContext<AuthContext | null>(null)
@@ -97,6 +98,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const redirectToProvider = async (provider: string, process: string) => {
+    postForm('/api/accounts/_allauth/browser/v1/auth/provider/redirect', {
+      method: 'POST',
+      provider,
+      process,
+      csrfmiddlewaretoken: getCookie('csrftoken'),
+      callback_url: window.location.origin + '/',
+    })
+  }
+
   if (isUserLoading || (!!user && isSubscriptionLoading)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -106,7 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, subscription, signup, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, subscription, signup, login, logout, redirectToProvider }}
+    >
       {children}
     </AuthContext.Provider>
   )

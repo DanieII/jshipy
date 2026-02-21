@@ -1,4 +1,4 @@
-import { cn, getAuthErrors } from '@/lib/utils'
+import { cn, getAuthFormErrors } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -33,10 +33,9 @@ export function LoginForm({
       onSubmit: formSchema,
       onSubmitAsync: async ({ value: data }) => {
         const result = await auth.login(data.email, data.password)
+        const errors = getAuthFormErrors(result.errors)
 
-        if (result.errors) {
-          return getAuthErrors(result.errors)
-        }
+        if (errors) return errors
 
         navigate({ to: '/' })
       },
@@ -78,7 +77,11 @@ export function LoginForm({
               </div>
               <Field>
                 <Button type="submit">Login</Button>
-                <Button variant="outline" type="button">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => auth.redirectToProvider('google', 'login')}
+                >
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">

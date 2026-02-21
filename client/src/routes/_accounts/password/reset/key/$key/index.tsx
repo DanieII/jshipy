@@ -1,5 +1,5 @@
 import { useAppForm } from '@/context/form-context'
-import { apiFetch } from '@/lib/utils'
+import { apiFetch, getAuthFormErrors } from '@/lib/utils'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Card,
@@ -49,16 +49,9 @@ function RouteComponent() {
             }),
           },
         )
+        const errors = getAuthFormErrors(result.error.errors)
 
-        if (result.error && result.status !== 401) {
-          return {
-            fields: {
-              password: {
-                message: 'Failed to reset password. Please try again.',
-              },
-            },
-          }
-        }
+        if (errors && result.status !== 401) return errors
 
         navigate({ to: '/login' })
       },
