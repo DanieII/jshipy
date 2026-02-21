@@ -35,7 +35,7 @@ class CreateCheckoutSessionView(APIView):
                     }
                 ],
                 customer_email=user.email,
-                success_url=f"{settings.BASE_URL}/dashboard/create",
+                success_url=f"{settings.BASE_URL}/dashboard",
                 cancel_url=f"{settings.BASE_URL}/",
                 automatic_tax={"enabled": True},
                 allow_promotion_codes=True,
@@ -77,7 +77,11 @@ def stripe_webhook(request):
                 "stripe_subscription_id": stripe_subscription_id,
             },
         )
-    elif event_type == "customer.subscription.deleted":
+
+    elif (
+        event_type == "customer.subscription.deleted"
+        or event_type == "invoice.payment_failed"
+    ):
         subscription = event["data"]["object"]
         subscription_id = subscription.get("id")
 

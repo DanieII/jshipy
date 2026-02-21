@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AccountsRouteImport } from './routes/_accounts'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AccountsRegisterRouteImport } from './routes/_accounts/register'
 import { Route as AccountsLoginRouteImport } from './routes/_accounts/login'
 import { Route as AccountsPasswordResetIndexRouteImport } from './routes/_accounts/password/reset/index'
@@ -20,10 +22,20 @@ const AccountsRoute = AccountsRouteImport.update({
   id: '/_accounts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const AccountsRegisterRoute = AccountsRegisterRouteImport.update({
   id: '/register',
@@ -50,24 +62,29 @@ const AccountsPasswordResetKeyKeyIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/login': typeof AccountsLoginRoute
   '/register': typeof AccountsRegisterRoute
-  '/password/reset': typeof AccountsPasswordResetIndexRoute
-  '/password/reset/key/$key': typeof AccountsPasswordResetKeyKeyIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/password/reset/': typeof AccountsPasswordResetIndexRoute
+  '/password/reset/key/$key/': typeof AccountsPasswordResetKeyKeyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AccountsLoginRoute
   '/register': typeof AccountsRegisterRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/password/reset': typeof AccountsPasswordResetIndexRoute
   '/password/reset/key/$key': typeof AccountsPasswordResetKeyKeyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/_accounts': typeof AccountsRouteWithChildren
   '/_accounts/login': typeof AccountsLoginRoute
   '/_accounts/register': typeof AccountsRegisterRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/_accounts/password/reset/': typeof AccountsPasswordResetIndexRoute
   '/_accounts/password/reset/key/$key/': typeof AccountsPasswordResetKeyKeyIndexRoute
 }
@@ -75,29 +92,35 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/login'
     | '/register'
-    | '/password/reset'
-    | '/password/reset/key/$key'
+    | '/dashboard/'
+    | '/password/reset/'
+    | '/password/reset/key/$key/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/register'
+    | '/dashboard'
     | '/password/reset'
     | '/password/reset/key/$key'
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/_accounts'
     | '/_accounts/login'
     | '/_accounts/register'
+    | '/dashboard/'
     | '/_accounts/password/reset/'
     | '/_accounts/password/reset/key/$key/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AccountsRoute: typeof AccountsRouteWithChildren
 }
 
@@ -106,8 +129,15 @@ declare module '@tanstack/react-router' {
     '/_accounts': {
       id: '/_accounts'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AccountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -116,6 +146,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/_accounts/register': {
       id: '/_accounts/register'
@@ -134,19 +171,31 @@ declare module '@tanstack/react-router' {
     '/_accounts/password/reset/': {
       id: '/_accounts/password/reset/'
       path: '/password/reset'
-      fullPath: '/password/reset'
+      fullPath: '/password/reset/'
       preLoaderRoute: typeof AccountsPasswordResetIndexRouteImport
       parentRoute: typeof AccountsRoute
     }
     '/_accounts/password/reset/key/$key/': {
       id: '/_accounts/password/reset/key/$key/'
       path: '/password/reset/key/$key'
-      fullPath: '/password/reset/key/$key'
+      fullPath: '/password/reset/key/$key/'
       preLoaderRoute: typeof AccountsPasswordResetKeyKeyIndexRouteImport
       parentRoute: typeof AccountsRoute
     }
   }
 }
+
+interface DashboardRouteRouteChildren {
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
 
 interface AccountsRouteChildren {
   AccountsLoginRoute: typeof AccountsLoginRoute
@@ -168,6 +217,7 @@ const AccountsRouteWithChildren = AccountsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AccountsRoute: AccountsRouteWithChildren,
 }
 export const routeTree = rootRouteImport

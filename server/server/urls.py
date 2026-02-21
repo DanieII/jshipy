@@ -39,6 +39,7 @@ urlpatterns = [
                     ),
                 ),
                 path("accounts/", include("accounts.urls")),
+                path("subscriptions/", include("subscriptions.urls")),
             ]
         ),
     ),
