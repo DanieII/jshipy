@@ -235,8 +235,6 @@ Add the following **variables** (non-sensitive configuration values):
 | `DEFAULT_FROM_EMAIL`       | Default sender email address                             |
 | `GHCR_USER`               | GitHub username for pulling GHCR images                  |
 
-> **Note:** Moving values from secrets to variables requires updating `.github/workflows/main.yml` to reference them with `${{ vars.VARIABLE_NAME }}` instead of `${{ secrets.VARIABLE_NAME }}`.
-
 ### 4. CI/CD Pipeline
 
 The GitHub Actions workflow (`.github/workflows/main.yml`) runs three jobs:
